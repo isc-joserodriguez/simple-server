@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
 // Configura la conexión a MongoDB
 mongoose
@@ -31,6 +32,7 @@ const User = mongoose.model('User', UserSchema);
 
 // Configuración de Express para manejar solicitudes JSON
 app.use(express.json());
+app.use(cors());
 
 // Ruta de registro de usuario
 app.post('/register', async (req, res) => {
