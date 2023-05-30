@@ -104,6 +104,12 @@ app.get('/users', authenticateToken, async (req, res) => {
 
 app.post('/user', authenticateToken, async (req, res) => {
   try {
+    const { firstName, lastName, email } = req.body;
+    const existingUser = await User.findOne({ email });
+    // Verifica si el usuario ya existe en la base de datos
+    if (existingUser) {
+      return res.status(400).json({ error: 'El usuario ya existe' });
+    }
     const user = new User({ firstName, lastName, email, password: 'password' });
 
     const createdUser = await user.save();
@@ -111,6 +117,7 @@ app.post('/user', authenticateToken, async (req, res) => {
       res.json({ message: 'Usuario registrado exitosamente' });
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -119,32 +126,37 @@ app.put('/user/:id', authenticateToken, async (req, res) => {
   try {
     const { firstName, lastName, email } = req.body;
 
-    const user = await User.findByIdAndUpdate(req.params.id, {
-      firstName,
-      lastName,
-      email,
-    });
-    // Verifica si el usuario ya existe en la base de datos
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        firstName,
+        lastName,
+        email,
+      },
+      {
+        new: true,
+      }
+    );
     if (!user) {
       return res.status(400).json({ error: 'No existe el usuario' });
     }
 
     res.json({ data: user });
   } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(500).json({ error: 'No existe el usuario' });
   }
 });
 
 app.delete('/user/:id', authenticateToken, async (req, res) => {
   try {
-    const user = await User.deleteOne(req.params.id);
+    const user = await User.findOneAndDelete(req.params.id);
     if (!user) {
       return res.status(400).json({ error: 'No existe el usuario' });
     }
 
     res.json({ data: user });
   } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(500).json({ error: 'Usuario no existe' });
   }
 });
 
