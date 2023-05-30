@@ -102,6 +102,52 @@ app.get('/users', authenticateToken, async (req, res) => {
   }
 });
 
+app.post('/user', authenticateToken, async (req, res) => {
+  try {
+    const user = new User({ firstName, lastName, email, password: 'password' });
+
+    const createdUser = await user.save();
+    if (createdUser) {
+      res.json({ message: 'Usuario registrado exitosamente' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+app.put('/user/:id', authenticateToken, async (req, res) => {
+  try {
+    const { firstName, lastName, email } = req.body;
+
+    const user = await User.findByIdAndUpdate(req.params.id, {
+      firstName,
+      lastName,
+      email,
+    });
+    // Verifica si el usuario ya existe en la base de datos
+    if (!user) {
+      return res.status(400).json({ error: 'No existe el usuario' });
+    }
+
+    res.json({ data: user });
+  } catch (error) {
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+app.delete('/user/:id', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.deleteOne(req.params.id);
+    if (!user) {
+      return res.status(400).json({ error: 'No existe el usuario' });
+    }
+
+    res.json({ data: user });
+  } catch (error) {
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // Función de middleware para autenticar el token
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
