@@ -48,7 +48,18 @@ app.post('/register', async (req, res) => {
 
     const createdUser = await user.save();
     if (createdUser) {
-      res.json({ message: 'Usuario registrado exitosamente' });
+      // Genera un token JWT válido por 1 hora
+      const token = jwt.sign(
+        {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+        'secretKey',
+        { expiresIn: '1h' }
+      );
+
+      res.json({ token });
     }
   } catch (error) {
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -149,7 +160,9 @@ app.put('/user/:id', authenticateToken, async (req, res) => {
 
 app.delete('/user/:id', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findOneAndDelete(req.params.id);
+    const user = await User.findOneAndDelete({
+      _id: req.params.id,
+    });
     if (!user) {
       return res.status(400).json({ error: 'No existe el usuario' });
     }
