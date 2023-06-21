@@ -95,8 +95,24 @@ app.post('/login', async (req, res) => {
 });
 
 // Ruta protegida por JWT
-app.get('/user', authenticateToken, (req, res) => {
+app.get('/users/getAll', authenticateToken, (req, res) => {
   res.json(req.user);
+});
+
+app.get('/users/:id', authenticateToken, async (req, res) => {
+  try {
+    const id = req.params.id; // obtener el ID del parámetro de ruta
+    const user = await User.findById(id); // buscar al usuario por ID
+
+    // verificar si el usuario existe
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({ data: user });
+  } catch (error) {
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 app.get('/users', authenticateToken, async (req, res) => {
@@ -113,7 +129,7 @@ app.get('/users', authenticateToken, async (req, res) => {
   }
 });
 
-app.post('/user', authenticateToken, async (req, res) => {
+app.post('/users', authenticateToken, async (req, res) => {
   try {
     const { firstName, lastName, email } = req.body;
     const existingUser = await User.findOne({ email });
@@ -133,7 +149,7 @@ app.post('/user', authenticateToken, async (req, res) => {
   }
 });
 
-app.put('/user/:id', authenticateToken, async (req, res) => {
+app.put('/users/:id', authenticateToken, async (req, res) => {
   try {
     const { firstName, lastName, email } = req.body;
 
@@ -158,7 +174,7 @@ app.put('/user/:id', authenticateToken, async (req, res) => {
   }
 });
 
-app.delete('/user/:id', authenticateToken, async (req, res) => {
+app.delete('/users/:id', authenticateToken, async (req, res) => {
   try {
     const user = await User.findOneAndDelete({
       _id: req.params.id,
