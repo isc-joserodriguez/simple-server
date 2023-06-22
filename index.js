@@ -95,7 +95,7 @@ app.post('/login', async (req, res) => {
 });
 
 // Ruta protegida por JWT
-app.get('/users/getAll', authenticateToken, (req, res) => {
+app.get('/users/my-info', authenticateToken, (req, res) => {
   res.json(req.user);
 });
 
